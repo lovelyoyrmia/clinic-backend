@@ -16,56 +16,73 @@ class Database {
     return res;
   }
 
-  async getAllData(role) {
-    const docRef = this.admin.collection(this.collection).doc(role);
-    return this.admin.getAll(docRef);
-  }
-
   async getDataByRole(role) {
-    const docRef = this.admin.collection(this.collection).doc(role);
-    const response = docRef.listCollections();
-    return response;
+    try {
+      const docRef = this.admin.collection(this.collection).doc(role);
+      const response = await docRef.listCollections();
+      return response;
+    } catch (error) {
+      return null;
+    }
   }
 
   async getDataByEmail(role, email) {
-    const docRef = this.admin
-      .collection(this.collection)
-      .doc(role)
-      .collection(email);
-    const response = docRef.get();
-    return response;
+    try {
+      const docRef = this.admin
+        .collection(this.collection)
+        .doc(role)
+        .collection(email);
+      const response = await docRef.get();
+      if (!response.empty) return null;
+      return response;
+    } catch (error) {
+      return null;
+    }
   }
 
   async getDataById(role, email, id) {
-    const docRef = this.admin
-      .collection(this.collection)
-      .doc(role)
-      .collection(email)
-      .doc(id);
+    try {
+      const docRef = this.admin
+        .collection(this.collection)
+        .doc(role)
+        .collection(email)
+        .doc(id);
 
-    const response = await docRef.get();
-    return response;
+      const response = await docRef.get();
+      if (!response.exists) return null;
+      return response;
+    } catch (error) {
+      return null;
+    }
   }
 
   async updateData(role, email, id, data) {
-    const docRef = this.admin
-      .collection(this.collection)
-      .doc(role)
-      .collection(email)
-      .doc(id);
+    try {
+      const docRef = this.admin
+        .collection(this.collection)
+        .doc(role)
+        .collection(email)
+        .doc(id);
 
-    const response = await docRef.update(data);
-    return response;
+      const response = await docRef.set(data);
+      return response;
+    } catch (error) {
+      return null;
+    }
   }
 
-  async deleteData(role, email, id) {
+  async deleteDataById(role, email, id) {
     const docRef = this.admin
       .collection(this.collection)
       .doc(role)
       .collection(email)
       .doc(id);
-
-    return await docRef.delete();
+    if ((await docRef.get()).exists) {
+      const response = await docRef.delete();
+      return response;
+    } else {
+      return null;
+    }
   }
 }
 
