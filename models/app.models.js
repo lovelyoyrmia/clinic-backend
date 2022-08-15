@@ -33,7 +33,7 @@ class Database {
         .doc(role)
         .collection(email);
       const response = await docRef.get();
-      if (!response.empty) return null;
+      if (response.empty) return null;
       return response;
     } catch (error) {
       return null;
@@ -77,12 +77,9 @@ class Database {
       .doc(role)
       .collection(email)
       .doc(id);
-    if ((await docRef.get()).exists) {
-      const response = await docRef.delete();
-      return response;
-    } else {
-      return null;
-    }
+    const response = await docRef.delete();
+    return response;
+    
   }
 }
 

@@ -3,6 +3,7 @@ const {
   addDatabase,
   getRoleDatabase,
   getAllDatabase,
+  getEmailData,
   getData,
   updateDatabase,
   deleteId,
@@ -11,6 +12,7 @@ const dataRouter = express.Router();
 
 dataRouter.post("/addData", addDatabase);
 dataRouter.post("/getRole", getRoleDatabase);
+dataRouter.post("/getDataByEmail", getEmailData);
 dataRouter.post("/getAllData", getAllDatabase);
 dataRouter.post("/getData/:id", getData);
 dataRouter.post("/updateData/:id", updateDatabase);

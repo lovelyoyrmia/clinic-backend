@@ -2,12 +2,17 @@ const Database = require("../models/app.models");
 
 async function addDatabase(req, res) {
   try {
-    const { uid, email, role } = req.body;
-    const date = new Date().toLocaleString();
+    const { uid, name, email, address, option, date, role } = req.body;
+    const currentDate = new Date().toLocaleString();
     const data = {
       uid: uid,
-      createdAt: date,
+      name: name,
       email: email,
+      address: address,
+      option: option,
+      appointmentDate: date,
+      role: role,
+      createdAt: currentDate,
     };
     await Database.saveData(role, data, email);
     data["role"] = role;
@@ -48,8 +53,6 @@ async function getData(req, res) {
     const id = req.params.id;
 
     const docRef = await Database.getDataById(role, email, id);
-    const resArr = [];
-    const data = {};
     if (docRef != null) {
       res.status(200).send({ message: "Success", data: docRef.data() });
     } else {
@@ -61,42 +64,65 @@ async function getData(req, res) {
   }
 }
 
-async function getAllDatabase(req, res) {
+async function getEmailData(req, res) {
   try {
     const { role, email } = req.body;
 
-    const docRef = await Database.getDataByRole(role, email);
-    if (docRef == null) {
-      res.status(200).send({ message: "Success", data: null, code: "No Data" });
-    } else {
+    const docRef = await Database.getDataByEmail(role, email);
+
+    if (docRef != null) {
       const resArr = [];
-      const data = {};
-      const results = [];
-      docRef.forEach((collection) => {
-        data["email"] = collection.id;
-        data["role"] = role;
-        resArr.push(data);
+      docRef.forEach((result) => {
+        let resData = result.data();
+        resData["docId"] = result.id;
+        resArr.push(resData);
       });
-
-      const doc = await Database.getDataByEmail(role, data["email"]);
-      if (doc != null) {
-        doc.forEach((result) => {
-          let resData = result.data();
-          resData["docId"] = result.id;
-          results.push(resData);
-        });
-        data["results"] = results;
-
-        res.status(200).send({ message: "Success", data: resArr });
-      } else {
-        res
-          .status(200)
-          .send({ message: "Success", data: null, code: "No Data" });
-      }
+      res.status(200).send({ message: "Success", data: resArr });
+    } else {
+      res.status(200).send({ message: "Success", data: null, code: "No Data" });
     }
   } catch (error) {
     res.send({ message: "Something went wrong" });
     console.log(error);
+  }
+}
+
+async function getAllDatabase(req, res) {
+  try {
+    const { role } = req.body;
+
+    const docRef = await Database.getDataByRole(role);
+    if (docRef == null) {
+      res.status(200).send({ message: "Success", data: null, code: "No Data" });
+    } else {
+      const results = [];
+      for (let index = 0; index < docRef.length; index++) {
+        const data = {};
+        const collection = docRef[index];
+        data["email"] = collection.id;
+        const doc = await Database.getDataByEmail(role, data["email"]);
+        const resArr = [];
+        if (doc != null) {
+          doc.forEach((result) => {
+            let resData = result.data();
+            resData["docId"] = result.id;
+            resArr.push(resData);
+          });
+          data["results"] = resArr;
+          results.push(data);
+        }
+      }
+      if (results.length === 0) {
+        res
+          .status(200)
+          .send({ message: "Success", data: null, code: "No Data" });
+      } else {
+        res.status(200).send({ message: "Success", data: results });
+      }
+    }
+  } catch (error) {
+    console.log(error);
+    res.send({ message: "Something went wrong" });
   }
 }
 
@@ -146,6 +172,7 @@ module.exports = {
   addDatabase,
   getRoleDatabase,
   getAllDatabase,
+  getEmailData,
   getData,
   updateDatabase,
   deleteId,
