@@ -2,13 +2,15 @@ const Database = require("../models/app.models");
 
 async function addDatabase(req, res) {
   try {
-    const { uid, name, email, address, option, date, role } = req.body;
+    const { uid, name, email, address, province, city, option, date, role } = req.body;
     const currentDate = new Date().toLocaleString();
     const data = {
       uid: uid,
       name: name,
       email: email,
       address: address,
+	  province: province,
+	  city: city,
       option: option,
       appointmentDate: date,
       role: role,

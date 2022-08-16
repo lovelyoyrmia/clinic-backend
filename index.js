@@ -22,8 +22,8 @@ app.use(
   })
 );
 
-// app.use(validateAuthToken);
-// app.use(setUser);
+app.use(validateAuthToken);
+app.use(setUser);
 
 app.use("/api", dataRouter);
 
