@@ -2,14 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const bodyParser = require("body-parser");
 const { PORT } = require("./config/app.config");
-const {
-  validateAuthToken,
-  setUser,
-  authUser,
-  authRole,
-} = require("./middleware/app.middleware");
-const { authRouter } = require("./router/auth.router");
-const { dataRouter } = require("./router/data.router");
+const router = require("./router/_index");
 
 const app = express();
 app.use(cors({ origin: true }));
@@ -22,13 +15,9 @@ app.use(
   })
 );
 
-app.use(validateAuthToken);
-app.use(setUser);
-
-app.use("/api", dataRouter);
-
-app.use("/auth/admin", authUser, authRole("ADMIN"), authRouter);
-app.use("/auth/user", authUser, authRole("USER"), authRouter);
+app.use("/api", router);
+// app.use("/apiv2/patient", authUser, authRole(ROLE.patient), authRouter);
+// app.use("/apiv2/doctor", authUser, authRole(ROLE.doctor), authRouter);
 
 app.listen(PORT || 5000, () => {
   console.log(`Server is running on PORT ${PORT || 5000}.`);
