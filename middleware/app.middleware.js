@@ -1,4 +1,5 @@
 const { admin } = require("../config/app.config");
+const { ROLE } = require("../utils/utils");
 const auth = admin.auth();
 
 const validateAuthToken = async (req, res, next) => {
@@ -9,9 +10,10 @@ const validateAuthToken = async (req, res, next) => {
       !req.headers.authorization.startsWith("Bearer ")) &&
     !(req.cookies && req.cookies._session)
   ) {
-    console.error("No Token pass as a Bearer token in header");
-    res.status(403).send("Unauthorized");
-    return;
+    throw {
+      code: "Unauthorized",
+      message: "No Token pass as a Bearer token in header",
+    };
   }
 
   let authToken;
@@ -29,24 +31,27 @@ const validateAuthToken = async (req, res, next) => {
     authToken = req.cookies._session;
   } else {
     // No cookie was found
-    res.status(403).send("Unauthorized");
-    return;
+    throw { code: "Unauthorized", message: "You don't have permission" };
   }
 
   try {
     const decodedToken = await auth.verifyIdToken(authToken);
     console.log("Token has been decoded", decodedToken);
-    req.user = decodedToken;
+    req.user = {
+      ...req.user,
+      accessToken: authToken,
+    };
     res.locals = {
       ...res.locals,
       uid: decodedToken.uid,
       email: decodedToken.email,
     };
+    console.log("USER", req.user);
+    console.log("LOCAL", req.locals);
     return next();
   } catch (error) {
     console.error(error);
-    res.status(403).send("Unauthorized");
-    return;
+    next(error);
   }
 };
 
@@ -58,30 +63,47 @@ const setUser = async (req, res, next) => {
     if (user) {
       req.user = {
         userId: userId,
-        role: role,
+        email: user.email,
+      };
+      req.user.role = { ...role, USER: ROLE.user };
+      console.log(req.user);
+    } else {
+      throw {
+        code: "Unauthorized",
+        message: "Not Allowed",
       };
     }
+
     return next();
   } catch (error) {
     console.error(error);
-    res.status(403).send("Unauthorized");
-    return;
+    next(error);
   }
 };
 
 const authUser = (req, res, next) => {
   if (req.user == null) {
     res.status(403);
-    return res.send({ message: "You need to sign in" });
+    return res.json({ message: "You need to sign in" });
   }
+  const roles = Object.values(req.user.role);
+  req.roles = roles;
   next();
 };
 
-const authRole = (role) => {
+const authRole = (...allowedRole) => {
   return (req, res, next) => {
-    if (req.user.role !== role && role !== "USER") {
-      res.status(401).send({ message: "Not allowed" });
-    }
+    if (!req?.roles) return res.status(401).json({ message: "Not allowed" });
+
+    const rolesArr = [...allowedRole];
+    console.log(rolesArr);
+    console.log("roles", req.roles);
+    const result = req.roles
+      .map((role) => rolesArr.includes(role))
+      .find((val) => val === true);
+    console.log(result);
+    if (!result) return res.status(401).json({ message: "Not allowed" });
+
     next();
   };
 };
