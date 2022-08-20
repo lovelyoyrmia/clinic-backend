@@ -1,8 +1,8 @@
 const ROLE = {
-  user: 2001,
-  admin: 1294,
-  patient: 3012,
-  doctor: 4011,
+  user: "USER123",
+  admin: "ADMIN1294",
+  patient: "PATIENT3012",
+  doctor: "DOCTOR4011",
 };
 
 const DATA = {

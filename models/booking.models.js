@@ -1,5 +1,4 @@
 const { admin } = require("../config/app.config");
-const { DATA } = require("../utils/utils");
 
 class BookingModels {
   constructor(collection) {

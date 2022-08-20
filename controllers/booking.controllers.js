@@ -1,11 +1,11 @@
 const Database = require("../models/booking.models");
-const { DATA } = require("../utils/utils");
+const { DATA, ROLE } = require("../utils/utils");
 
 const booking = new Database(DATA.booking);
 class BookingController {
   async addDatabase(req, res, next) {
     try {
-      const { uid, name, email, symptoms, option, date, role } = req.body;
+      const { uid, name, email, symptoms, option, date } = req.body;
       const currentDate = new Date().toLocaleString();
       const data = {
         uid: uid,
@@ -14,10 +14,9 @@ class BookingController {
         symptoms: symptoms,
         option: option,
         appointmentDate: date,
-        role: role,
         createdAt: currentDate,
       };
-      await booking.saveData(role, data, email);
+      await booking.saveData(ROLE.patient, data, email);
       // data["role"] = role;
       res.status(200).json({ message: "Success", data: data });
     } catch (error) {
@@ -28,15 +27,12 @@ class BookingController {
 
   async getRoleDatabase(req, res, next) {
     try {
-      const { role } = req.body;
-
-      const docRef = await booking.getDataByRole(role);
+      const docRef = await booking.getDataByRole(ROLE.patient);
       const resArr = [];
       const data = {};
       if (docRef.length != 0) {
         docRef.forEach((collection) => {
           data["email"] = collection.id;
-          data["role"] = role;
           resArr.push(data);
         });
 
@@ -52,10 +48,10 @@ class BookingController {
 
   async getDataById(req, res, next) {
     try {
-      const { role, email } = req.body;
+      const { email } = req.body;
       const id = req.params.id;
 
-      const docRef = await booking.getDataById(role, email, id);
+      const docRef = await booking.getDataById(ROLE.patient, email, id);
       if (docRef != null) {
         res.status(200).json({ message: "Success", data: docRef.data() });
       } else {
@@ -69,9 +65,9 @@ class BookingController {
 
   async getEmailData(req, res, next) {
     try {
-      const { role, email } = req.body;
+      const { email } = req.body;
 
-      const docRef = await booking.getDataByEmail(role, email);
+      const docRef = await booking.getDataByEmail(ROLE.patient, email);
 
       if (docRef != null) {
         const resArr = [];
@@ -92,9 +88,7 @@ class BookingController {
 
   async getAllDatabase(req, res, next) {
     try {
-      const role = req.params.role;
-
-      const docRef = await booking.getDataByRole(role);
+      const docRef = await booking.getDataByRole(ROLE.patient);
       if (docRef == null) {
         throw { code: "No Data", message: "No data was found" };
       } else {
@@ -103,7 +97,7 @@ class BookingController {
           const data = {};
           const collection = docRef[index];
           data["email"] = collection.id;
-          const doc = await booking.getDataByEmail(role, data["email"]);
+          const doc = await booking.getDataByEmail(ROLE.patient, data["email"]);
           const resArr = [];
           if (doc != null) {
             doc.forEach((result) => {
@@ -129,11 +123,11 @@ class BookingController {
 
   async updateDatabase(req, res, next) {
     try {
-      const { role, email } = req.body;
+      const { email } = req.body;
       const id = req.params.id;
       const data = {};
 
-      const docRef = await booking.updateData(role, email, id, data);
+      const docRef = await booking.updateData(ROLE.patient, email, id, data);
       if (docRef != null) {
         res.status(200).json({ message: "Success", data: data });
       } else {
@@ -147,9 +141,9 @@ class BookingController {
 
   async deleteId(req, res, next) {
     try {
-      const { role, email } = req.body;
+      const { email } = req.body;
       const id = req.params.id;
-      const doc = await booking.deleteDataById(role, email, id);
+      const doc = await booking.deleteDataById(ROLE.patient, email, id);
       if (doc != null) {
         res.status(200).json({ message: "Success" });
       } else {

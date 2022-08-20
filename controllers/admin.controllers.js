@@ -1,15 +1,17 @@
 const Database = require("../models/user.models");
 const DatabaseBooking = require("../models/booking.models");
-const { DATA } = require("../utils/utils");
+const { DATA, ROLE } = require("../utils/utils");
 
-const admin = new Database(DATA.admin);
+const patient = new Database(DATA.patient);
+const doctor = new Database(DATA.doctor);
 const booking = new DatabaseBooking(DATA.booking);
 class AdminController {
-  async getUserById(req, res, next) {
+  // ============== USER ==============
+  async getUser(req, res, next) {
     try {
       const uid = req.params.id;
 
-      const docRef = await admin.getDataById(uid);
+      const docRef = await patient.getDataById(uid);
       if (docRef != null) {
         res.status(200).json({ message: "Success", data: docRef.data() });
       } else {
@@ -23,7 +25,7 @@ class AdminController {
 
   async getAllUsers(req, res, next) {
     try {
-      const docRef = await admin.getData();
+      const docRef = await patient.getData();
       if (docRef == null) {
         throw { code: "No Data", message: "No data was found" };
       } else {
@@ -47,7 +49,7 @@ class AdminController {
         isVerified: true,
       };
 
-      const docRef = await admin.updateData(uid, data);
+      const docRef = await patient.updateData(uid, data);
       if (docRef != null) {
         res.status(200).json({ message: "Success", data: data });
       } else {
@@ -59,11 +61,11 @@ class AdminController {
     }
   }
 
-  async deleteUserId(req, res, next) {
+  async deleteUser(req, res, next) {
     try {
       const uid = req.params.id;
-      const doc = await admin.deleteDataById(uid);
-      if (doc != null) {
+      const doc = await patient.deleteDataById(uid);
+      if (doc == null) {
         res.status(200).json({ message: "Success" });
       } else {
         throw { code: "No Data", message: "No data was found" };
@@ -74,9 +76,82 @@ class AdminController {
     }
   }
 
+  // ============== DOCTOR ==============
+
+  async getDoctor(req, res, next) {
+    try {
+      const uid = req.params.id;
+
+      const docRef = await doctor.getDataById(uid);
+      if (docRef != null) {
+        res.status(200).json({ message: "Success", data: docRef.data() });
+      } else {
+        throw { code: "No Data", message: "No data was found" };
+      }
+    } catch (error) {
+      next(error);
+      console.log(error);
+    }
+  }
+
+  async getAllDoctors(req, res, next) {
+    try {
+      const docRef = await doctor.getData();
+      if (docRef == null) {
+        throw { code: "No Data", message: "No data was found" };
+      } else {
+        const results = [];
+        docRef.forEach((doc) => {
+          const data = doc.data();
+          results.push(data);
+        });
+        res.status(200).json({ message: "Success", data: results });
+      }
+    } catch (error) {
+      next(error);
+      console.log(error);
+    }
+  }
+
+  async updateVerifiedDoctor(req, res, next) {
+    try {
+      const uid = req.params.id;
+      const data = {
+        isVerified: true,
+      };
+
+      const docRef = await doctor.updateData(uid, data);
+      if (docRef != null) {
+        res.status(200).json({ message: "Success", data: data });
+      } else {
+        throw { code: "No Data", message: "No data was found" };
+      }
+    } catch (error) {
+      next(error);
+      console.log(error);
+    }
+  }
+
+  async deleteDoctor(req, res, next) {
+    try {
+      const uid = req.params.id;
+      const doc = await doctor.deleteDataById(uid);
+      if (doc == null) {
+        res.status(200).json({ message: "Success" });
+      } else {
+        throw { code: "No Data", message: "No data was found" };
+      }
+    } catch (error) {
+      next(error);
+      console.log(error);
+    }
+  }
+
+  // ============== APPOINTMENTS ==============
+
   async getAppointments(req, res, next) {
     try {
-      let role = req.params.id;
+      const role = ROLE.patient;
 
       const docRef = await booking.getDataByRole(role);
       if (docRef == null) {

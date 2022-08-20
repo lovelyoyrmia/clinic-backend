@@ -19,7 +19,11 @@ router.use(authUser);
 router.use("/doctor", authRole(ROLE.admin, ROLE.doctor), doctorRouter);
 router.use("/patient", authRole(ROLE.admin, ROLE.patient), patientRouter);
 router.use("/admin", authRole(ROLE.admin), adminRouter);
-router.use("/appointment", appointmentRouter);
+router.use(
+  "/appointment",
+  authRole(ROLE.admin, ROLE.patient),
+  appointmentRouter
+);
 router.use(errorHandler);
 
 module.exports = router;
