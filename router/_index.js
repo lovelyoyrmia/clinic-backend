@@ -17,6 +17,7 @@ router.use(setUser);
 router.use(authUser);
 // router.use(validateAuthToken);
 router.use("/doctor", authRole(ROLE.admin, ROLE.doctor), doctorRouter);
+router.use("/notification", (req, res) => {});
 router.use("/patient", authRole(ROLE.admin, ROLE.patient), patientRouter);
 router.use("/admin", authRole(ROLE.admin), adminRouter);
 router.use(
