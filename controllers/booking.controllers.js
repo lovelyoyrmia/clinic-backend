@@ -16,7 +16,7 @@ class BookingController {
         appointmentDate: date,
         createdAt: currentDate,
       };
-      await booking.saveData(ROLE.patient, data, email);
+      await booking.saveData(ROLE.patient, data, uid);
       // data["role"] = role;
       res.status(200).json({ message: "Success", data: data });
     } catch (error) {
@@ -48,10 +48,10 @@ class BookingController {
 
   async getDataById(req, res, next) {
     try {
-      const { email } = req.body;
+      const { uid } = req.body;
       const id = req.params.id;
 
-      const docRef = await booking.getDataById(ROLE.patient, email, id);
+      const docRef = await booking.getDataById(ROLE.patient, uid, id);
       if (docRef != null) {
         res.status(200).json({ message: "Success", data: docRef.data() });
       } else {
@@ -65,9 +65,9 @@ class BookingController {
 
   async getEmailData(req, res, next) {
     try {
-      const { email } = req.body;
+      const { uid } = req.body;
 
-      const docRef = await booking.getDataByEmail(ROLE.patient, email);
+      const docRef = await booking.getDataByEmail(ROLE.patient, uid);
 
       if (docRef != null) {
         const resArr = [];

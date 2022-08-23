@@ -26,15 +26,24 @@ app.use(
 );
 
 app.use("/api", router);
+
+// SOCKET CONFIG
+const messages = [];
 io.on("connection", (socket) => {
   console.log(`User connected: ${socket.id}`);
-  socket.emit("hai", { message: "haiiiiii" });
+  console.log(messages);
+
+  socket.on("sendNotification", ({ senderId, result }) => {
+    const data = {};
+    data["senderId"] = senderId;
+    data["result"] = result;
+    messages.push(data);
+  });
+
   socket.on("disconnect", () => {
     console.log("user disconnected " + socket.id);
   });
 });
-// app.use("/apiv2/patient", authUser, authRole(ROLE.patient), authRouter);
-// app.use("/apiv2/doctor", authUser, authRole(ROLE.doctor), authRouter);
 
 server.listen(PORT || 5000, () => {
   console.log(`Server is running on PORT ${PORT || 5000}.`);

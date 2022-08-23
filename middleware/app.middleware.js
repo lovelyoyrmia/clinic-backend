@@ -76,7 +76,7 @@ const setUser = async (req, res, next) => {
 
     return next();
   } catch (error) {
-    console.error(error);
+    console.error(error.code);
     next(error);
   }
 };
