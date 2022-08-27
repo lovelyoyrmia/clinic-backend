@@ -123,11 +123,19 @@ class BookingController {
 
   async updateDatabase(req, res, next) {
     try {
-      const { email } = req.body;
+      const { uid, name, email, symptoms, option, date } = req.body;
       const id = req.params.id;
-      const data = {};
-
-      const docRef = await booking.updateData(ROLE.patient, email, id, data);
+	  const currentDate = new Date().toLocaleString();
+	  const data = {
+        uid: uid,
+        name: name,
+        email: email,
+        symptoms: symptoms,
+        option: option,
+        appointmentDate: date,
+        createdAt: currentDate,
+      };
+      const docRef = await booking.updateData(ROLE.patient, uid, id, data);
       if (docRef != null) {
         res.status(200).json({ message: "Success", data: data });
       } else {
@@ -141,9 +149,9 @@ class BookingController {
 
   async deleteId(req, res, next) {
     try {
-      const { email } = req.body;
+      const { uid } = req.body;
       const id = req.params.id;
-      const doc = await booking.deleteDataById(ROLE.patient, email, id);
+      const doc = await booking.deleteDataById(ROLE.patient, uid, id);
       if (doc != null) {
         res.status(200).json({ message: "Success" });
       } else {

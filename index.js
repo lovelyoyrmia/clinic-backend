@@ -5,6 +5,7 @@ const bodyParser = require("body-parser");
 const { Server } = require("socket.io");
 const { PORT } = require("./config/app.config");
 const router = require("./router/_index");
+const Notification = require("./controllers/notification.controller");
 
 const app = express();
 const server = http.createServer(app);
@@ -30,15 +31,11 @@ app.use("/api", router);
 // SOCKET CONFIG
 const messages = [];
 io.on("connection", (socket) => {
+  const notif = new Notification(socket);
   console.log(`User connected: ${socket.id}`);
   console.log(messages);
 
-  socket.on("sendNotification", ({ senderId, result }) => {
-    const data = {};
-    data["senderId"] = senderId;
-    data["result"] = result;
-    messages.push(data);
-  });
+  notif.sendNotification();
 
   socket.on("disconnect", () => {
     console.log("user disconnected " + socket.id);
