@@ -29,11 +29,9 @@ app.use(
 app.use("/api", router);
 
 // SOCKET CONFIG
-const messages = [];
-io.on("connection", (socket) => {
+io.of("/api/notifications").on("connection", (socket) => {
   const notif = new Notification(socket);
   console.log(`User connected: ${socket.id}`);
-  console.log(messages);
 
   notif.sendNotification();
 

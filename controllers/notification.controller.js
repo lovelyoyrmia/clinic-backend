@@ -1,17 +1,18 @@
+const BookingModels = require("../models/booking.models");
+const { DATA } = require("../utils/utils");
+
+const notification = new BookingModels(DATA.notification);
 class Notification {
   constructor(socket) {
     this.socket = socket;
   }
 
   sendNotification = () => {
-	let messages = [];
-    this.socket.on("sendNotification", ({ senderId, result }) => {
-      const data = {};
-      data["senderId"] = senderId;
-      data["result"] = result;
-      messages.push(data);
+    this.socket.on("sendNotification", (data) => {
+      if (data != null) {
+        this.socket.emit("newRegistered", "");
+      }
     });
-	return messages;
   };
 }
 

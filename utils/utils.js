@@ -10,6 +10,7 @@ const DATA = {
   patient: "PATIENT",
   doctor: "DOCTOR",
   admin: "ADMIN",
+  notification: "NOTIFICATIONS",
 };
 
 const DOCTOR = {

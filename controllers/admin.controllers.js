@@ -46,7 +46,7 @@ class AdminController {
     try {
       const uid = req.params.id;
       const data = {
-        isVerified: true,
+        is_verified: true,
       };
 
       const docRef = await patient.updateData(uid, data);
@@ -65,7 +65,7 @@ class AdminController {
     try {
       const uid = req.params.id;
       const doc = await patient.deleteDataById(uid);
-      if (doc == null) {
+      if (doc != null) {
         res.status(200).json({ message: "Success" });
       } else {
         throw { code: "No Data", message: "No data was found" };

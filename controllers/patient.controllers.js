@@ -31,14 +31,15 @@ class UserController {
         gender: gender,
         weight: weight,
         height: height,
-        maritalStatus: maritalStatus,
-        phoneNumber: phoneNumber,
-        isVerified: false,
+        marital_status: maritalStatus,
+        phone_number: phoneNumber,
+        is_verified: false,
         blood: blood,
         address: address,
         province: province,
         city: city,
-        createdAt: currentDate,
+        image_url: "",
+        created_at: currentDate,
       };
       await user.saveData(uid, data);
       res.status(200).json({ message: "Success", data: data });
@@ -86,38 +87,44 @@ class UserController {
   async updateDatabase(req, res, next) {
     try {
       const uid = req.params.id;
-      const {
-        name,
-        email,
-        age,
-        birthDate,
-        birthPlace,
-        maritalStatus,
-        weight,
-        height,
-        phoneNumber,
-        gender,
-        blood,
-        address,
-        province,
-        city,
-      } = req.body;
-      const data = {
-        name: name,
-        email: email,
-        age: age,
-        birthDate: birthDate,
-        birthPlace: birthPlace,
-        gender: gender,
-        weight: weight,
-        height: height,
-        maritalStatus: maritalStatus,
-        phoneNumber: phoneNumber,
-        blood: blood,
-        address: address,
-        province: province,
-        city: city,
-      };
+      let data;
+      if ("image_url" in req.body) {
+        data = {
+          image_url: req.body.image_url,
+        };
+      } else {
+        const {
+          name,
+          email,
+          age,
+          birth,
+          maritalStatus,
+          weight,
+          height,
+          phoneNumber,
+          gender,
+          blood,
+          address,
+          province,
+          city,
+        } = req.body;
+
+        data = {
+          name: name,
+          email: email,
+          age: age,
+          birth: birth,
+          gender: gender,
+          weight: weight,
+          height: height,
+          maritalStatus: maritalStatus,
+          phoneNumber: phoneNumber,
+          blood: blood,
+          address: address,
+          province: province,
+          city: city,
+        };
+      }
 
       const docRef = await user.updateData(uid, data);
       if (docRef != null) {
