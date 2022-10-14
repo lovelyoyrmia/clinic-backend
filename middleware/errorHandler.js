@@ -1,5 +1,7 @@
 function errorHandler(err, req, res, next) {
   switch (err.code) {
+    case "Bad Request":
+      return res.status(400).json({ code: err.code, message: err.message });
     case "auth/id-token-expired":
       return res.status(400).json({ code: err.code, message: err.message });
     case "auth/invalid-email":

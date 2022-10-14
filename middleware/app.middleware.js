@@ -1,9 +1,10 @@
 const { admin } = require("../config/app.config");
 const { ROLE } = require("../utils/utils");
+const { verifyJwt } = require("../helpers/jsonwebtoken");
 const auth = admin.auth();
 
 const validateAuthToken = async (req, res, next) => {
-  console.log("Checking request if authorized with Firebase ID Token");
+  console.log("Checking request if authorized with Access Token");
   // if no Token was passed
   if (
     (!req.headers.authorization ||
@@ -35,22 +36,21 @@ const validateAuthToken = async (req, res, next) => {
   }
 
   try {
-    const decodedToken = await auth.verifyIdToken(authToken);
-    console.log("Token has been decoded", decodedToken);
+    let decodedToken;
     req.user = {
       ...req.user,
       accessToken: authToken,
     };
-    res.locals = {
-      ...res.locals,
-      uid: decodedToken.uid,
-      email: decodedToken.email,
-    };
-    console.log("USER", req.user);
-    console.log("LOCAL", req.locals);
+    if (req.body.ROLE.ADMIN === ROLE.admin) {
+      decodedToken = verifyJwt(authToken, process.env.ACCESS_TOKEN_SECRET);
+      req.user.role = { ...req.body.ROLE, USER: ROLE.user };
+      console.log(req.user);
+    } else {
+      decodedToken = await auth.verifyIdToken(authToken);
+    }
+    console.log("Token has been decoded", decodedToken);
     return next();
   } catch (error) {
-    console.error(error);
     next(error);
   }
 };
@@ -101,7 +101,6 @@ const authRole = (...allowedRole) => {
     const result = req.roles
       .map((role) => rolesArr.includes(role))
       .find((val) => val === true);
-    console.log(result);
     if (!result) return res.status(401).json({ message: "Not allowed" });
 
     next();

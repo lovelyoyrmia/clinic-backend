@@ -1,5 +1,4 @@
 const admin = require("firebase-admin");
-require("dotenv").config();
 const service = {
   type: "service_account",
   project_id: "clinic-83bd4",
