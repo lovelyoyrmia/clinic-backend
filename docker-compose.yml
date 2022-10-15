@@ -1,0 +1,15 @@
+version: "3.9"
+
+services:
+  web:
+    container_name: dentika
+    image: dentika
+    restart: always
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: base
+    ports:
+      - "${PORT}:${PORT}"
+    env_file:
+      - .env

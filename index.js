@@ -37,6 +37,6 @@ app.use(
 
 app.use("/api", router);
 
-server.listen(PORT || 5000, () => {
-  console.log(`Server is running on PORT ${PORT || 5000}.`);
+server.listen(3000, () => {
+  console.log(`Server is running on PORT ${3000}.`);
 });
