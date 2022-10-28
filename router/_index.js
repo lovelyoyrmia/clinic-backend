@@ -1,5 +1,4 @@
 const express = require("express");
-const doctorRouter = require("../router/doctors.router");
 const patientRouter = require("../router/patient.router");
 const appointmentRouter = require("../router/data.router");
 const adminRouter = require("../router/admin.router");
@@ -17,7 +16,6 @@ router.use("/admin", adminRouter);
 router.use(setUser);
 router.use(authUser);
 // router.use(validateAuthToken);
-router.use("/doctor", authRole(ROLE.admin, ROLE.doctor), doctorRouter);
 router.use("/patient", authRole(ROLE.admin, ROLE.patient), patientRouter);
 router.use(
   "/appointment",

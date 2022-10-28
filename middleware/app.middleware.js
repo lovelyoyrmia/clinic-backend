@@ -41,9 +41,9 @@ const validateAuthToken = async (req, res, next) => {
       ...req.user,
       accessToken: authToken,
     };
-    if (req.body.ROLE.ADMIN === ROLE.admin) {
+    if (req.query.role === ROLE.admin) {
       decodedToken = verifyJwt(authToken, process.env.ACCESS_TOKEN_SECRET);
-      req.user.role = { ...req.body.ROLE, USER: ROLE.user };
+      req.user.role = { ADMIN: req.query.role, USER: ROLE.user };
       console.log(req.user);
     } else {
       decodedToken = await auth.verifyIdToken(authToken);
@@ -56,7 +56,7 @@ const validateAuthToken = async (req, res, next) => {
 };
 
 const setUser = async (req, res, next) => {
-  const { email, role } = req.body;
+  const { email, role } = req.query;
   try {
     const user = await auth.getUserByEmail(email);
     const userId = user.uid;

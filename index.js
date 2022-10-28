@@ -3,26 +3,18 @@ const cors = require("cors");
 const http = require("http");
 const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
-const { PORT } = require("./config/app.config");
 const router = require("./router/_index");
+const db = require("./models");
 require("dotenv").config();
 const app = express();
 const server = http.createServer(app);
+module.exports = server;
 // const io = new Server(server, {
 //   cors: {
 //     origin: "http://localhost:3000",
 //     methods: ["GET", "POST"],
 //   },
 // });
-
-// db.sequelize
-//   .authenticate()
-//   .then(() => {
-//     console.log("success");
-//   })
-//   .catch((error) => {
-//     console.log(error);
-//   });
 
 app.use(cors({ origin: "http://localhost:3000", credentials: true }));
 app.use(cookieParser());
@@ -37,6 +29,6 @@ app.use(
 
 app.use("/api", router);
 
-server.listen(3000, () => {
-  console.log(`Server is running on PORT ${3000}.`);
+server.listen(5000, () => {
+  console.log(`Server is running on PORT ${5000}.`);
 });

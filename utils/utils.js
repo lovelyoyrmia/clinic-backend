@@ -6,8 +6,8 @@ const ROLE = {
 };
 
 const DATA = {
-  booking: "BOOKING",
-  patient: "PATIENT",
+  booking: "APPOINTMENTS",
+  patient: "PATIENTS",
   doctor: "DOCTOR",
   admin: "ADMIN",
   notification: "NOTIFICATIONS",

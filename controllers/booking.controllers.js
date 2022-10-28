@@ -1,9 +1,11 @@
 const Database = require("../models/booking.models");
-const { DATA, ROLE } = require("../utils/utils");
+const PatientDatabase = require("../models/user.models");
+const { DATA } = require("../utils/utils");
 
 const booking = new Database(DATA.booking);
+const patient = new PatientDatabase(DATA.patient);
 class BookingController {
-  async addDatabase(req, res, next) {
+  async addAppointment(req, res, next) {
     try {
       const { uid, name, email, symptoms, option, date } = req.body;
       const currentDate = new Date().toLocaleString();
@@ -16,8 +18,7 @@ class BookingController {
         appointmentDate: date,
         createdAt: currentDate,
       };
-      await booking.saveData(ROLE.patient, data, uid);
-      // data["role"] = role;
+      await booking.saveData(data, uid);
       res.status(200).json({ message: "Success", data: data });
     } catch (error) {
       next(error);
@@ -25,138 +26,100 @@ class BookingController {
     }
   }
 
-  async getRoleDatabase(req, res, next) {
+  async getAppointments(req, res, next) {
     try {
-      const docRef = await booking.getDataByRole(ROLE.patient);
-      const resArr = [];
-      const data = {};
-      if (docRef.length != 0) {
-        docRef.forEach((collection) => {
-          data["email"] = collection.id;
-          resArr.push(data);
+      const docPatient = await patient.getData();
+      if (docPatient == null)
+        throw { code: "No Data", message: "No data was found" };
+      const patientId = new Set();
+      console.time("fast load");
+      docPatient.forEach((doc) => {
+        patientId.add(doc.id);
+      });
+      const patientPromise = [...patientId].map((id) => booking.getData(id));
+      const results = await Promise.all(patientPromise);
+      const appointments = [];
+      Promise.all(
+        results.map((appoint) =>
+          appoint.forEach((ress) => appointments.push(ress.data()))
+        )
+      );
+      console.timeEnd("fast load");
+      res.status(200).json({
+        message: "Success",
+        data: appointments,
+      });
+    } catch (error) {
+      next(error);
+      console.log(error);
+    }
+  }
+
+  async getAppointmentsByPatient(req, res, next) {
+    try {
+      const uid = req.params.uid;
+      const docRef = await booking.getData(uid);
+      if (docRef == null)
+        throw { code: "No Data", message: "No data was found" };
+      const results = [];
+      docRef.forEach((doc) => {
+        const data = doc.data();
+        results.push({
+          docId: doc.id,
+          ...data,
         });
-
-        res.status(200).json({ message: "Success", data: resArr });
-      } else {
-        throw { code: "No Data", message: "No data was found" };
-      }
+      });
+      res.status(200).json({ message: "Success", data: results });
     } catch (error) {
       next(error);
       console.log(error);
     }
   }
 
-  async getDataById(req, res, next) {
+  async getAppointmentsById(req, res, next) {
     try {
-      const { uid } = req.body;
-      const id = req.params.id;
-
-      const docRef = await booking.getDataById(ROLE.patient, uid, id);
-      if (docRef != null) {
-        res.status(200).json({ message: "Success", data: docRef.data() });
-      } else {
+      const uid = req.params.uid;
+      const id = req.query.id;
+      const docRef = await booking.getDataById(uid, id);
+      if (docRef == null)
         throw { code: "No Data", message: "No data was found" };
-      }
+      res.status(200).json({ message: "Success", data: docRef.data() });
     } catch (error) {
       next(error);
       console.log(error);
     }
   }
 
-  async getEmailData(req, res, next) {
+  async updateAppointment(req, res, next) {
     try {
-      const { uid } = req.body;
-
-      const docRef = await booking.getDataByEmail(ROLE.patient, uid);
-
-      if (docRef != null) {
-        const resArr = [];
-        docRef.forEach((result) => {
-          let resData = result.data();
-          resData["docId"] = result.id;
-          resArr.push(resData);
-        });
-        res.status(200).json({ message: "Success", data: resArr });
-      } else {
-        throw { code: "No Data", message: "No data was found" };
-      }
-    } catch (error) {
-      next(error);
-      console.log(error);
-    }
-  }
-
-  async getAllDatabase(req, res, next) {
-    try {
-      const docRef = await booking.getDataByRole(ROLE.patient);
-      if (docRef == null) {
-        throw { code: "No Data", message: "No data was found" };
-      } else {
-        const results = [];
-        for (let index = 0; index < docRef.length; index++) {
-          const data = {};
-          const collection = docRef[index];
-          data["email"] = collection.id;
-          const doc = await booking.getDataByEmail(ROLE.patient, data["email"]);
-          const resArr = [];
-          if (doc != null) {
-            doc.forEach((result) => {
-              let resData = result.data();
-              resData["docId"] = result.id;
-              resArr.push(resData);
-            });
-            data["results"] = resArr;
-            results.push(data);
-          }
-        }
-        if (results.length === 0) {
-          throw { code: "No Data", message: "No data was found" };
-        } else {
-          res.status(200).json({ message: "Success", data: results });
-        }
-      }
-    } catch (error) {
-      console.log(error);
-      next(error);
-    }
-  }
-
-  async updateDatabase(req, res, next) {
-    try {
-      const { uid, name, email, symptoms, option, date } = req.body;
-      const id = req.params.id;
-	  const currentDate = new Date().toLocaleString();
-	  const data = {
+      const uid = req.params.uid;
+      const id = req.query.id;
+      const { name, email, symptoms, option, date } = req.body;
+      const currentDate = new Date().toLocaleString();
+      const data = {
         uid: uid,
         name: name,
         email: email,
         symptoms: symptoms,
         option: option,
         appointmentDate: date,
-        createdAt: currentDate,
+        updatedAt: currentDate,
       };
-      const docRef = await booking.updateData(ROLE.patient, uid, id, data);
-      if (docRef != null) {
-        res.status(200).json({ message: "Success", data: data });
-      } else {
+      const docRef = await booking.updateData(uid, id, data);
+      if (docRef == null)
         throw { code: "No Data", message: "No data was found" };
-      }
+      res.status(200).json({ message: "Success", data: data });
     } catch (error) {
       next(error);
       console.log(error);
     }
   }
-
-  async deleteId(req, res, next) {
+  async deleteAppointment(req, res, next) {
     try {
-      const { uid } = req.body;
-      const id = req.params.id;
-      const doc = await booking.deleteDataById(ROLE.patient, uid, id);
-      if (doc != null) {
-        res.status(200).json({ message: "Success" });
-      } else {
-        throw { code: "No Data", message: "No data was found" };
-      }
+      const uid = req.params.uid;
+      const id = req.query.id;
+      await booking.deleteData(uid, id);
+      res.status(200).json({ message: "Success" });
     } catch (error) {
       next(error);
       console.log(error);

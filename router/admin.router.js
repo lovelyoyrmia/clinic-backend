@@ -1,5 +1,7 @@
 const express = require("express");
 const AdminController = require("../controllers/admin.controllers");
+const BookingController = require("../controllers/booking.controllers");
+const PatientController = require("../controllers/patient.controllers");
 const {
   validateAuthToken,
   authRole,
@@ -14,87 +16,23 @@ router.post("/login", AdminController.login);
 router.get("/token", AdminController.refreshToken);
 router.delete("/logout", AdminController.logout);
 
+router.use(validateAuthToken);
+router.use(authUser);
+router.use(authRole(ROLE.admin));
 // PATIENTS
-router.post(
-  "/addUser",
-  validateAuthToken,
-  authUser,
-  authRole(ROLE.admin),
-  AdminController.addUser
-);
-router.post(
-  "/patients",
-  validateAuthToken,
-  authUser,
-  authRole(ROLE.admin),
-  AdminController.getAllUsers
-);
-router.post(
-  "/patient/:id",
-  validateAuthToken,
-  authUser,
-  authRole(ROLE.admin),
-  AdminController.getUser
-);
-router.put(
-  "/updatePatient/:id",
-  validateAuthToken,
-  authUser,
-  authRole(ROLE.admin),
-  AdminController.updateUser
-);
-router.put(
-  "/updateVerifiedPatient/:id",
-  validateAuthToken,
-  authUser,
-  authRole(ROLE.admin),
-  AdminController.updateVerifiedUser
-);
-router.post(
-  "/deletePatient/:id",
-  validateAuthToken,
-  authUser,
-  authRole(ROLE.admin),
-  AdminController.deleteUser
-);
-
-// DOCTORS
-router.post(
-  "/doctors",
-  validateAuthToken,
-  authUser,
-  authRole(ROLE.admin),
-  AdminController.getAllDoctors
-);
-router.post(
-  "/doctor/:id",
-  validateAuthToken,
-  authUser,
-  authRole(ROLE.admin),
-  AdminController.getDoctor
-);
-router.put(
-  "/updateDoctor/:id",
-  validateAuthToken,
-  authUser,
-  authRole(ROLE.admin),
-  AdminController.updateVerifiedDoctor
-);
-router.post(
-  "/deleteDoctor/:id",
-  validateAuthToken,
-  authUser,
-  authRole(ROLE.admin),
-  AdminController.deleteDoctor
-);
+router.post("/addUser", PatientController.addPatient);
+router.get("/patients", PatientController.getPatients);
+router.get("/patient/:id", PatientController.getPatient);
+router.put("/patient/:id", PatientController.updatePatient);
+router.put("/patientVerified/:id", PatientController.updateVerifiedPatient);
+router.delete("/patient/:id", PatientController.deletePatient);
 
 // APPOINTMENT
-router.post(
-  "/appointments",
-  validateAuthToken,
-  authUser,
-  authRole(ROLE.admin),
-  AdminController.getAppointments
-);
+router.post("/appointments", BookingController.addAppointment);
+router.get("/appointments", BookingController.getAppointments);
+router.get("/appointments/:uid", BookingController.getAppointmentsByPatient);
+router.get("/appointment/:uid", BookingController.getAppointmentsById);
+router.put("/appointment/:uid", BookingController.updateAppointment);
+router.delete("/appointment/:uid", BookingController.deleteAppointment);
 
 module.exports = router;

@@ -13,3 +13,17 @@ services:
       - "${PORT}:${PORT}"
     env_file:
       - .env
+    environment:
+      - DB_HOSTNAME=postgres_db
+      - DB_PORT=3306
+      - DB_DATABASE=database_dev
+      - DB_USERNAME=postgres
+      - DB_PASSWORD=lovelyo
+  postgres_db:
+    image: postgres:9.6.8-alpine
+    volumes:
+      - postgres_db:/var/lib/postgresql/data
+    ports:
+      - 3030:5432
+volumes:
+  postgres_db:
